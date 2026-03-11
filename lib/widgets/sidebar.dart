@@ -20,41 +20,50 @@ class _SidebarState extends State<Sidebar> {
           boxShadow: [BoxShadow(blurRadius: 15, color:Colors.black)],
         ),
         padding: EdgeInsets.only(top: 30, bottom: 20, left: 40, right: 40),
-        child: ListView(
+        child: Column(
           children: [
-            Center(child: SidebarText('Лабораторная 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
-            Center(child: SidebarText('Задание 1')),
+            SidebarText('Содержание'),
+            SizedBox(height: 20,),
+            Expanded(
+              child: ListView(
+                children: [
+                  ExpansionTile(
+                    title: SidebarText('Лабораторная 1'),
+                    children: [
+                      ListTile(
+                        title: SidebarText('Задание 1'),
+                        onTap: () => {},
+                      ),
+                      ListTile(
+                        title: SidebarText('Задание 2'),
+                        onTap: () => {},
+                      ),
+                      ListTile(
+                        title: SidebarText('Задание 3'),
+                        onTap: () => {},
+                      ),
+                      ListTile(
+                        title: SidebarText('Задание 4'),
+                        onTap: () => {},
+                      ),
+                    ],  
+                  ),
+                  ExpansionTile(
+                    title: SidebarText('Лабораторная 2'),
+                    children: [
+                      ListTile(
+                        title: SidebarText('Задание 1'),
+                        onTap: () => {},
+                      ),
+                      ListTile(
+                        title: SidebarText('Задание 2'),
+                        onTap: () => {},
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -64,7 +73,7 @@ class _SidebarState extends State<Sidebar> {
   Widget SidebarText (String text){
     return Text(text, 
       style: TextStyle(
-        color: Colors.blueGrey,
+        color: Colors.black,
         fontFamily: 'Inter',
         fontSize: 20,
       ),    
