@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:graphic/core/widgets/pointinput.dart';
 
 class TaskFirst extends StatefulWidget {
   const TaskFirst({super.key});
@@ -18,15 +19,25 @@ class _TaskFirstState extends State<TaskFirst> {
             maxLines: 5,),
           ),
 
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              margin: EdgeInsets.all(20),
-              width: 500,
-              height: 250,
-              child: Image.asset('assets/images/soon.jpg',
-                    fit: BoxFit.fill),
-            ),
+          Row(
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  margin: EdgeInsets.all(20),
+                  width: 500,
+                  height: 250,
+                  child: Image.asset('assets/images/soon.jpg',
+                        fit: BoxFit.fill),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                Align(alignment: Alignment.centerLeft, child: PointInput(name: 'A', dimension: 2,)),
+                Align(alignment: Alignment.centerLeft, child: PointInput(name: 'B', dimension: 2,)),
+                Align(alignment: Alignment.centerLeft, child: PointInput(name: 'C', dimension: 2,)),],)
+            ],
           ),
         ],
     );
