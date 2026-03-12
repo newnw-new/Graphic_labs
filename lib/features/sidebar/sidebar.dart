@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class Sidebar extends StatefulWidget {
-  const Sidebar ({super.key});
+  final Function(String taskId) onTaskSelect;
+  const Sidebar ({super.key, required this.onTaskSelect});
   
   @override
   _SidebarState createState() => _SidebarState();
@@ -12,7 +13,7 @@ class _SidebarState extends State<Sidebar> {
   Widget build(BuildContext context) {
     
     return FractionallySizedBox(
-      widthFactor: 1/3,
+      //widthFactor: 1/3,
       child: Container(
         decoration: BoxDecoration(
           color: Color.fromRGBO(252, 252, 253, 1),
@@ -32,19 +33,19 @@ class _SidebarState extends State<Sidebar> {
                     children: [
                       ListTile(
                         title: SidebarText('Задание 1'),
-                        onTap: () => {},
+                        onTap: () => {widget.onTaskSelect('task1')},
                       ),
                       ListTile(
                         title: SidebarText('Задание 2'),
-                        onTap: () => {},
+                        onTap: () => {widget.onTaskSelect('task2')},
                       ),
                       ListTile(
                         title: SidebarText('Задание 3'),
-                        onTap: () => {},
+                        onTap: () => {widget.onTaskSelect('task3')},
                       ),
                       ListTile(
                         title: SidebarText('Задание 4'),
-                        onTap: () => {},
+                        onTap: () => {widget.onTaskSelect('task4')},
                       ),
                     ],  
                   ),
