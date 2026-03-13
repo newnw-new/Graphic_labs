@@ -10,10 +10,10 @@ class PointField extends StatefulWidget {
   const PointField({super.key, required this.name, required this.dimension});
 
   @override
-  State<PointField> createState() => _PointFieldState();
+  State<PointField> createState() => PointFieldState();
 }
 
-class _PointFieldState extends State<PointField> {
+class PointFieldState extends State<PointField> {
 // разобраться с модификатором late
   late final List<TextEditingController> _controllers;
 
@@ -62,5 +62,9 @@ class _PointFieldState extends State<PointField> {
       _controllers[i].dispose();
     }
     super.dispose();
+  }
+
+  List<double> getCoordinates(){
+    return _controllers.map((c) => double.parse(c.text)).toList();
   }
 }

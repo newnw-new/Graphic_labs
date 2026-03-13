@@ -11,6 +11,9 @@ class TaskFirst extends StatefulWidget {
 
 class _TaskFirstState extends State<TaskFirst> {
   String? _answer = null;
+  final GlobalKey<PointFieldState> _aKey = GlobalKey();
+  final GlobalKey<PointFieldState> _bKey = GlobalKey();
+  final GlobalKey<PointFieldState> _cKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +40,14 @@ class _TaskFirstState extends State<TaskFirst> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                PointField(name: 'A', dimension: 2,),
-                PointField(name: 'B', dimension: 2,),
-                PointField(name: 'C', dimension: 2,),
+                PointField(key: _aKey, name: 'A', dimension: 2,),
+                PointField(key: _bKey, name: 'B', dimension: 2,),
+                PointField(key: _cKey, name: 'C', dimension: 2,),
                 TextButton(onPressed: () => {setState(() {
-                  _answer = LineEquation.withTwoPoints(A1: Point(x: 0, y: 0), A2: Point(x: 4, y: 5)).getStringFormat();
+                  _answer = LineEquation.withPointAndVector(
+                    O: Point(x: _cKey.currentState!.getCoordinates()[0], y: _cKey.currentState!.getCoordinates()[1]),
+                    vec: Point(x: _aKey.currentState!.getCoordinates()[0] - _bKey.currentState!.getCoordinates()[0],
+                      y: _aKey.currentState!.getCoordinates()[1] - _bKey.currentState!.getCoordinates()[1])).getStringFormat();
                   })}, child: Text('Гоу Гоу Гоу')),
                 ],)
             ],
