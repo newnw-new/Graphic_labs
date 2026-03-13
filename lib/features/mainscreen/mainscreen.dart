@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graphic/features/sidebar/sidebar.dart';
-import 'package:graphic/features/tasks/labFirst/taskFirst.dart';
+import 'package:graphic/features/tasks/labFirst/taskFirst/taskFirst.dart';
 import 'package:graphic/features/tasks/labFirst/taskFour.dart';
 import 'package:graphic/features/tasks/labFirst/taskSecond.dart';
 import 'package:graphic/features/tasks/labFirst/taskThird.dart';

@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 //Тут нужно задать логику переноса, добавить валидацию
 //и возможность изменить размер этого виджета
 
-class PointInput extends StatefulWidget {
+class PointField extends StatefulWidget {
   final String name;
   final int dimension;
 
-  const PointInput({super.key, required this.name, required this.dimension});
+  const PointField({super.key, required this.name, required this.dimension});
 
   @override
-  State<PointInput> createState() => _PointInputState();
+  State<PointField> createState() => _PointFieldState();
 }
 
-class _PointInputState extends State<PointInput> {
+class _PointFieldState extends State<PointField> {
 // разобраться с модификатором late
   late final List<TextEditingController> _controllers;
 

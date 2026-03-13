@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:graphic/core/widgets/pointinput.dart';
+import 'package:graphic/core/widgets/pointfield.dart';
+import 'package:graphic/features/tasks/labFirst/taskFirst/logic.dart';
 
 class TaskFirst extends StatefulWidget {
   const TaskFirst({super.key});
@@ -9,6 +10,8 @@ class TaskFirst extends StatefulWidget {
 }
 
 class _TaskFirstState extends State<TaskFirst> {
+  String? _answer = null;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -34,11 +37,16 @@ class _TaskFirstState extends State<TaskFirst> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                Align(alignment: Alignment.centerLeft, child: PointInput(name: 'A', dimension: 2,)),
-                Align(alignment: Alignment.centerLeft, child: PointInput(name: 'B', dimension: 2,)),
-                Align(alignment: Alignment.centerLeft, child: PointInput(name: 'C', dimension: 2,)),],)
+                PointField(name: 'A', dimension: 2,),
+                PointField(name: 'B', dimension: 2,),
+                PointField(name: 'C', dimension: 2,),
+                TextButton(onPressed: () => {setState(() {
+                  _answer = LineEquation.withTwoPoints(A1: Point(x: 0, y: 0), A2: Point(x: 4, y: 5)).getStringFormat();
+                  })}, child: Text('Гоу Гоу Гоу')),
+                ],)
             ],
           ),
+          if(_answer != null) Text('Результат: ${_answer}')
         ],
     );
   }
