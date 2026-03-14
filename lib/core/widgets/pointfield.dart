@@ -5,51 +5,43 @@ import 'package:flutter/material.dart';
 
 class PointField extends StatefulWidget {
   final String name;
-  final int dimension;
+  final PointEditingController controller;
+  final TextStyle? style;
 
-  const PointField({super.key, required this.name, required this.dimension});
+  const PointField({super.key, required this.name, required this.controller, this.style});
 
   @override
   State<PointField> createState() => PointFieldState();
 }
 
 class PointFieldState extends State<PointField> {
-// разобраться с модификатором late
-  late final List<TextEditingController> _controllers;
-
-  @override
-  void initState() {
-    _controllers = List.generate(widget.dimension,
-      (_) => TextEditingController(),);
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Row(children: [
-      Text('${widget.name}('),
+      Text('${widget.name}(', style: widget.style),
       ..._buildCoordinateFields(),
-      Text(')'),
+      Text(')', style: widget.style),
     ],);
   }
 
    List<Widget> _buildCoordinateFields() {
     final List<Widget> fields = [];
-    for (int i = 0; i < widget.dimension; i++) {
+    for (int i = 0; i < widget.controller.controllers.length; i++) {
       
       fields.add(
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 50),
           child: IntrinsicWidth(
             child: TextField(
-              controller: _controllers[i],
+              controller: widget.controller.controllers[i],
               decoration: const InputDecoration(border: InputBorder.none),
             ),
           ),
         ),
       );
       
-      if (i < widget.dimension - 1) {
+      if (i < widget.controller.controllers.length - 1) {
         fields.add(const Text(','));
       }
     }
@@ -58,13 +50,26 @@ class PointFieldState extends State<PointField> {
 
   @override
   void dispose() {
-    for(int i = 0; i < widget.dimension; ++i){
-      _controllers[i].dispose();
+    for(int i = 0; i < widget.controller.controllers.length; ++i){
+      widget.controller.controllers[i].dispose();
     }
     super.dispose();
   }
 
-  List<double> getCoordinates(){
-    return _controllers.map((c) => double.parse(c.text)).toList();
+}
+
+
+class PointEditingController {
+  final List<TextEditingController> controllers;
+
+  //Разобраться что за синтаксис с двоеточием
+  PointEditingController(int dimension)
+  : controllers = List.generate(dimension,
+      (_) => TextEditingController(),);
+
+  List<String> values() => controllers.map((c) => c.text).toList();
+
+  void dispose() {
+    for (var c in controllers) c.dispose();
   }
 }
