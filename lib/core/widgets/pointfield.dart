@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 //Тут нужно задать логику переноса, добавить валидацию
 //и возможность изменить размер этого виджета
@@ -35,6 +36,9 @@ class PointFieldState extends State<PointField> {
           child: IntrinsicWidth(
             child: TextField(
               controller: widget.controller.controllers[i],
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^-?\d*\.?\d*')),
+              ],
               decoration: const InputDecoration(border: InputBorder.none),
             ),
           ),
