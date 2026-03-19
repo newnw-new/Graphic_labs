@@ -4,18 +4,18 @@ import 'package:flutter/services.dart';
 //Тут нужно задать логику переноса, добавить валидацию
 //и возможность изменить размер этого виджета
 
-class PointField extends StatefulWidget {
+class VecField extends StatefulWidget {
   final String name;
-  final PointEditingController controller;
+  final VecEditingController controller;
   final TextStyle? style;
 
-  const PointField({super.key, required this.name, required this.controller, this.style});
+  const VecField({super.key, required this.name, required this.controller, this.style});
 
   @override
-  State<PointField> createState() => PointFieldState();
+  State<VecField> createState() => VecFieldState();
 }
 
-class PointFieldState extends State<PointField> {
+class VecFieldState extends State<VecField> {
 
   @override
   Widget build(BuildContext context) {
@@ -63,11 +63,11 @@ class PointFieldState extends State<PointField> {
 }
 
 
-class PointEditingController {
+class VecEditingController {
   final List<TextEditingController> controllers;
 
   //Разобраться что за синтаксис с двоеточием
-  PointEditingController(int dimension)
+  VecEditingController(int dimension)
   : controllers = List.generate(dimension,
       (_) => TextEditingController(),);
 
