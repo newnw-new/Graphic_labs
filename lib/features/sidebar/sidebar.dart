@@ -54,11 +54,11 @@ class _SidebarState extends State<Sidebar> {
                     children: [
                       ListTile(
                         title: SidebarText('Задание 1'),
-                        onTap: () => {},
+                        onTap: () => {widget.onTaskSelect('task5')},
                       ),
                       ListTile(
                         title: SidebarText('Задание 2'),
-                        onTap: () => {},
+                        onTap: () => {widget.onTaskSelect('task6')},
                       ),
                     ],
                   ),

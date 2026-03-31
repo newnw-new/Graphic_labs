@@ -173,10 +173,9 @@ class Plane {
       return null;
     }
 
-    //Разобраться почему так
     final v1 = _vec1.coordinates();
     final v2 = _vec2.coordinates();
-    // Векторное произведение v1 × v2
+
     final A = v1[1] * v2[2] - v1[2] * v2[1];
     final B = v1[2] * v2[0] - v1[0] * v2[2];
     final C = v1[0] * v2[1] - v1[1] * v2[0];
@@ -197,4 +196,100 @@ double? scalarProduct(Vec vec1, Vec vec2) {
   }
 
   return result;
+}
+
+class Matrix {
+  late final List<List<double>> elements;
+
+  Matrix(List<List<double>> elements){
+    if (elements.isEmpty){ throw ArgumentError('Дан пустой массив для задания матрицы');}
+
+    final rowsCount = elements.length;
+    final columnsCount = elements[0].length;
+
+    for (int i = 0; i < rowsCount; ++i){
+      if (elements[i].isEmpty || elements[i].length != columnsCount) {
+        throw ArgumentError('Задан неккоректный размер матрицы. Строки имеют разное число элементов');
+      }
+    }
+
+    this.elements = elements.map((row) => List<double>.from(row)).toList();
+  }
+
+  List<List<double>> get matrixElements => elements.map((row) => List<double>.from(row)).toList();
+  //Переписать
+  Matrix operator *(Matrix matrix){
+
+    final rows1 = elements.length;
+    final cols1 = elements[0].length;
+    final rows2 = matrix.elements.length;
+    final cols2 = matrix.elements[0].length;
+
+    if (cols1 != rows2) {
+      throw ArgumentError(
+        'Умножение невозможно: количество столбцов первой матрицы ($cols1) '
+        'не равно количеству строк второй ($rows2)',
+      );
+    }
+
+    final resultRows = List.generate(rows1, (_) => List<double>.filled(cols2, 0.0));
+
+    for (int i = 0; i < rows1; ++i) {
+      for (int j = 0; j < cols2; ++j) {
+        double sum = 0.0;
+        for (int k = 0; k < cols1; ++k) {
+          sum += elements[i][k] * matrix.elements[k][j];
+        }
+        resultRows[i][j] = sum;
+      }
+    }
+
+    return Matrix(resultRows);
+  }
+
+  Matrix scale(double scalar){
+    List<List<double>> newList = elements.map((row) => List<double>.from(row)).toList();
+    for(int i = 0; i < newList.length; ++i){
+      for(int j = 0; j < newList[i].length; ++j){
+        newList[i][j] *= scalar;
+      }
+    }
+
+    return Matrix(newList);
+  }
+
+  Matrix operator +(Matrix matrix){
+    if(matrix.elements.length != elements.length) {
+      throw ArgumentError('Для сложения была дана матрица с другим количеством строк');
+    }
+
+    for(int i = 0; i < elements.length; ++i){
+      if(matrix.elements[i].length != elements[i].length){
+        throw ArgumentError('Для сложения была дана матрица с другим количеством столбцов');      
+      }
+    }
+
+    List<List<double>> newElements = elements.map((row) => List<double>.from(row)).toList();
+    
+    for(int i = 0; i < newElements.length; ++i){
+      for(int j = 0; j < newElements[i].length; ++j){
+        newElements[i][j] += matrix.elements[i][j];
+      }
+    }
+
+    return Matrix(newElements);
+  }
+
+  Matrix operator -(){
+    List<List<double>> newElements = elements.map((row) => _negativeList(row)).toList();
+    return Matrix(newElements);
+  }
+
+  Matrix operator -(Matrix matrix){
+    return this + -(matrix);
+  }
+
+  List<double> _negativeList (List<double> list){
+    return list.map((e) => -e).toList();
+  }
 }

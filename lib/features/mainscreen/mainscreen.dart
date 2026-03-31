@@ -4,6 +4,8 @@ import 'package:graphic/features/tasks/labFirst/taskFirst.dart';
 import 'package:graphic/features/tasks/labFirst/taskFour.dart';
 import 'package:graphic/features/tasks/labFirst/taskSecond.dart';
 import 'package:graphic/features/tasks/labFirst/taskThird.dart';
+import 'package:graphic/features/tasks/labSecond/taskFirst/taskFirst.dart';
+import 'package:graphic/features/tasks/labSecond/taskSecond.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key, required this.title});
@@ -47,6 +49,8 @@ class _MainScreenState extends State<MainScreen> {
       case 'task2': return const TaskSecond();
       case 'task3': return const TaskThird();
       case 'task4': return const TaskFour();
+      case 'task5': return const TaskFirstLabSecond();
+      case 'task6': return const FlyingAirplane();
       default: return Text('Не получилось');
     }
   }
