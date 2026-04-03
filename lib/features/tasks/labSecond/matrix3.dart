@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:math';
 
@@ -101,4 +102,5 @@ class Matrix3 {
   }
 
   Matrix3 multiply(Matrix3 matrix) => this*matrix;
+
 }
