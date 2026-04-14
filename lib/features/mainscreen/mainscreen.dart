@@ -50,7 +50,7 @@ class _MainScreenState extends State<MainScreen> {
       case 'task3': return const TaskThird();
       case 'task4': return const TaskFour();
       case 'task5': return const TaskFirstLabSecond();
-      case 'task6': return const FlyingAirplane();
+      case 'task6': return const TaskSecondLabSecond();
       default: return Text('Не получилось');
     }
   }

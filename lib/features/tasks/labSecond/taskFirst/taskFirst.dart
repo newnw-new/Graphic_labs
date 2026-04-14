@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:graphic/core/widgets/coordinateGrid.dart';
 import 'package:graphic/core/widgets/helpButtons.dart';
-import 'package:graphic/features/tasks/labSecond/matrix3.dart';
+import 'package:graphic/core/utils/matrix3.dart';
 import 'package:graphic/features/tasks/labSecond/taskFirst/transformEditor.dart';
 
 class TaskFirstLabSecond extends StatefulWidget {
@@ -24,34 +24,24 @@ class _TaskFirstLabSecondState extends State<TaskFirstLabSecond> {
   void initState() {
     super.initState();
 
-    //Создаём звезду – копируем логику из Star.generateStarPoints
-    final starPoints = _generateStarPoints(
-      outerRadius: 2,
-      innerRadius: 1,
-      points: 5,
-    );
     _Figure = DrawableFigure(
       contours: [
         [
-          Offset(-0.9510565162951536, -0.3090169943749473),
-          Offset(-1.1755705045849465, -1.6180339887498947),
-          Offset(1.9021130325903073, 0.6180339887498943),
-          Offset(0.5877852522924734, 0.8090169943749472),
-          Offset(1.2246467991473532e-16, 2),
-          Offset(-0.587785252292473, 0.8090169943749475),
-          Offset(-1.902113032590307, 0.618033988749895),
-          Offset(1.1755705045849458, -1.6180339887498951),
-          Offset(0.9510565162951535, -0.3090169943749477),
+          Offset(0.0, 2.0),
+          Offset(-0.6, 0.8),
+          Offset(0.0, -1.0),
+          Offset(0.0, 2.0)
         ],
-        [Offset(-1.8369701987210297e-16, -1), Offset(-0.587785252292473, 0.8090169943749475)],
-        [Offset(-1.8369701987210297e-16, -1), Offset(1.2246467991473532e-16, 2)],
-        [Offset(-1.8369701987210297e-16, -1), Offset(0.587785252292473, 0.8090169943749475)],
+        [Offset(0.0, 2.0), Offset(0.6, 0.8), Offset(0.0, -1)],
+        [Offset(0.6, 0.8), Offset(1.9, 0.6), Offset(0.0, -1.0), Offset(0.6, 0.8)],
+        [Offset(-0.6, 0.8), Offset(-1.9, 0.6), Offset(0.0, -1.0), Offset(-0.6, 0.8)],
+        [Offset(0.0, -1.0), Offset(1.2, -1.6), Offset(1.0, -0.18)],
+        [Offset(0.0, -1.0), Offset(-1.2, -1.6), Offset(-1.0, -0.18)]
       ],
       transform: Matrix3.identity(), // небольшое смещение для красоты
       paint: Paint()
         ..color = Colors.orange
-        ..style = PaintingStyle.fill,
-      closed: true,
+        ..style = PaintingStyle.stroke,
     );
   }
 

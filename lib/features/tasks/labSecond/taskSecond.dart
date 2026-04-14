@@ -1,131 +1,85 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
+import 'package:flutter/scheduler.dart';
+import 'package:graphic/core/widgets/coordinateGrid.dart';
+import 'package:graphic/core/utils/matrix3.dart';
 
-class FlyingAirplane extends StatefulWidget {
-  const FlyingAirplane({super.key});
+class TaskSecondLabSecond extends StatefulWidget {
+  const TaskSecondLabSecond({super.key});
 
   @override
-  State<FlyingAirplane> createState() => _FlyingAirplaneState();
+  State<TaskSecondLabSecond> createState() => _TaskSecondLabSecondState();
 }
 
-class _FlyingAirplaneState extends State<FlyingAirplane>
-    with TickerProviderStateMixin {  // ← заменили SingleTickerProviderStateMixin
-  late AnimationController _propellerController;
-  late AnimationController _movementController;
-  late Animation<double> _positionAnimation;
+class _TaskSecondLabSecondState extends State<TaskSecondLabSecond>
+    with SingleTickerProviderStateMixin {
+  // ← заменили SingleTickerProviderStateMixin
+  late Ticker _ticker;
+  double _time = 0;
+  //final model = PlaneModel.create();
 
   @override
   void initState() {
     super.initState();
-
-    // Анимация вращения пропеллера (бесконечная)
-    _propellerController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    )..repeat();
-
-    // Анимация движения по горизонтали (туда-обратно)
-    _movementController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 5),
-    )..repeat(reverse: true);
-
-    // Анимация смещения по X
-    _positionAnimation = Tween<double>(begin: -200, end: 400)
-        .animate(CurvedAnimation(parent: _movementController, curve: Curves.linear));
+    _ticker = Ticker((elapsed) {
+      setState(() {
+        _time = elapsed.inMilliseconds / 1000.0;
+      });
+    });
+    _ticker.start();
   }
 
   @override
   void dispose() {
-    _propellerController.dispose();
-    _movementController.dispose();
+    _ticker.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Летящий самолёт')),
-      body: AnimatedBuilder(
-        animation: Listenable.merge([_propellerController, _positionAnimation]),
-        builder: (context, child) {
-          return CustomPaint(
-            painter: AirplanePainter(
-              propellerAngle: _propellerController.value * 2 * math.pi,
-              xOffset: _positionAnimation.value,
-            ),
-            size: Size.infinite,
-          );
-        },
-      ),
+    final body = [
+      [
+        Offset(-12, 0), // Тело
+        Offset(-12, 1),
+        Offset(0, 2),
+        Offset(0, -2),
+        Offset(-12, 0),
+      ],
+      [Offset(0, 2), Offset(3, 1), Offset(3, -1), Offset(0, -2)], //мотор
+      [Offset(-3, 0), Offset(-11, -4), Offset(-7, 0)], //Боковое крыло
+      [Offset(-12, 1), Offset(-12, 4), Offset(-10, 1)], //Заднее крыло
+      [Offset(3, 0.5), Offset(4, 0), Offset(3, -0.5)], // Крепеж для лопастей
+    ];
+    final wings = [[Offset(3.5, 0.25), Offset(3.5, 5)], [Offset(3.5, -0.25), Offset(3.5, -5)]];
+
+    final dx = -20 + (_time * 5) % 40;
+
+    final translation = Matrix3.translation(dx, 0).scale(0.5, 0.5);
+    final wingAnimation = translation.scale(1, sin(_time*15));
+
+    return CoordinateGrid(
+      figures: [
+        DrawableFigure(
+          contours: body,
+          transform: translation,
+          paint: Paint()
+            ..color = Colors.black87
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2
+        ),
+        DrawableFigure(
+          contours: wings,
+          transform: wingAnimation,
+          paint: Paint()
+            ..color = Colors.black87
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 5,
+        ),
+      ],
+      showAxes: false,
+      showGrid: false,
+      isPan: false,
+      isZoom: false
     );
-  }
-}
-
-class AirplanePainter extends CustomPainter {
-  final double propellerAngle;
-  final double xOffset;
-
-  AirplanePainter({required this.propellerAngle, required this.xOffset});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double centerY = size.height / 2;
-    final double centerX = size.width / 2 + xOffset;
-
-    canvas.save();
-    canvas.translate(centerX, centerY);
-
-    // Корпус самолёта
-    final Paint bodyPaint = Paint()..color = Colors.blue;
-    final Path body = Path();
-    body.moveTo(-30, 0);
-    body.lineTo(0, -10);
-    body.lineTo(60, -8);
-    body.lineTo(70, 0);
-    body.lineTo(60, 8);
-    body.lineTo(0, 10);
-    body.close();
-    canvas.drawPath(body, bodyPaint);
-
-    // Крылья
-    final Paint wingPaint = Paint()..color = Colors.blueGrey;
-    canvas.drawRect(const Rect.fromLTWH(30, -15, 40, 6), wingPaint);
-    canvas.drawRect(const Rect.fromLTWH(30, 9, 40, 6), wingPaint);
-
-    // Хвост
-    final Paint tailPaint = Paint()..color = Colors.blue;
-    final Path tail1 = Path();
-    tail1.moveTo(-20, -6);
-    tail1.lineTo(-35, -12);
-    tail1.lineTo(-20, -10);
-    tail1.close();
-    canvas.drawPath(tail1, tailPaint);
-
-    final Path tail2 = Path();
-    tail2.moveTo(-20, 6);
-    tail2.lineTo(-35, 12);
-    tail2.lineTo(-20, 10);
-    tail2.close();
-    canvas.drawPath(tail2, tailPaint);
-
-    // Пропеллер
-    canvas.save();
-    canvas.translate(-30, 0);
-    canvas.rotate(propellerAngle);
-    final Paint propPaint = Paint()..color = Colors.brown..strokeWidth = 4;
-    canvas.drawLine(const Offset(0, 0), const Offset(20, 0), propPaint);
-    canvas.drawLine(const Offset(0, 0), const Offset(-20, 0), propPaint);
-    canvas.drawLine(const Offset(0, 0), const Offset(0, 20), propPaint);
-    canvas.drawLine(const Offset(0, 0), const Offset(0, -20), propPaint);
-    canvas.restore();
-
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(covariant AirplanePainter oldDelegate) {
-    return oldDelegate.propellerAngle != propellerAngle ||
-        oldDelegate.xOffset != xOffset;
   }
 }

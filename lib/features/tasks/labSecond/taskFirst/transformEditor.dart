@@ -1,25 +1,34 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:graphic/core/widgets/coordinateGrid.dart';
-import 'package:graphic/features/tasks/labSecond/matrix3.dart';
+import 'package:graphic/core/utils/matrix3.dart';
+import 'package:graphic/core/widgets/pointfield.dart';
 
-enum TransformType { translate, scale, rotate, reflectX, reflectY, reflectYX }
+enum TransformType { translate, scale, rotate, reflectX, reflectY, reflectYX, rotateP }
 
 class TransformItem {
   TransformType type;
   double tx;
   double ty;
+  double cx;
+  double cy;
   double sx;
   double sy;
   double angle;
+  bool useDegree;
 
   TransformItem({
     required this.type,
     this.tx = 0.0,
     this.ty = 0.0,
+    this.cx = 0.0,
+    this.cy = 0.0,
     this.sx = 1.0,
     this.sy = 1.0,
     this.angle = 0.0,
+    this.useDegree = false,
   });
 
   Matrix3 toMatrix() {
@@ -29,28 +38,27 @@ class TransformItem {
       case TransformType.scale:
         return Matrix3.scale(sx, sy);
       case TransformType.rotate:
-        return Matrix3.rotation(angle);
+        final radAngle = useDegree ? angle * pi / 180 : angle;
+        return Matrix3.rotation(radAngle);
       case TransformType.reflectX:
         return Matrix3.reflectX();
       case TransformType.reflectY:
         return Matrix3.reflectY();
       case TransformType.reflectYX:
         return Matrix3.reflectYX();
+      case TransformType.rotateP:
+        final radAngle = useDegree ? angle * pi / 180 : angle;
+        return Matrix3.rotationAbout(radAngle, cx, cy);
     }
   }
 }
 
-/// Виджет, позволяющий редактировать последовательность преобразований
-/// и применять их к исходной фигуре.
 class TransformEditor extends StatefulWidget {
   final DrawableFigure Figure;
   final Function(DrawableFigure) onApply;
 
-  const TransformEditor({
-    Key? key,
-    required this.Figure,
-    required this.onApply,
-  }) : super(key: key);
+  const TransformEditor({Key? key, required this.Figure, required this.onApply})
+    : super(key: key);
 
   @override
   State<TransformEditor> createState() => _TransformEditorState();
@@ -93,7 +101,6 @@ class _TransformEditorState extends State<TransformEditor> {
       contours: widget.Figure.contours,
       transform: newTransform,
       paint: widget.Figure.paint,
-      closed: widget.Figure.closed,
     );
 
     widget.onApply(transformedFigure);
@@ -125,9 +132,14 @@ class _TransformEditorState extends State<TransformEditor> {
                       item.sy = 1.0;
                     } else if (newType == TransformType.rotate) {
                       item.angle = 0.0;
+                    } else if (newType == TransformType.rotateP){
+                      item.angle = 0.0;
+                      item.cx = 0.0;
+                      item.cy = 0.0;
                     }
                   });
                 },
+                onAngleTypeChanged: () => setState(() {}),
               );
             },
           ),
@@ -140,7 +152,7 @@ class _TransformEditorState extends State<TransformEditor> {
             label: const Text('Добавить преобразование'),
           ),
         ),
-        // Кнопка применения (показывается только когда есть преобразования)
+
         if (_transforms.isNotEmpty)
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -162,25 +174,25 @@ class TransformCard extends StatelessWidget {
   final TransformItem item;
   final VoidCallback onDelete;
   final void Function(TransformType) onTypeChanged;
+  final VoidCallback onAngleTypeChanged;
 
   const TransformCard({
     super.key,
     required this.item,
     required this.onDelete,
     required this.onTypeChanged,
+    required this.onAngleTypeChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      //margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
           children: [
-            // Выбор типа преобразования
             SizedBox(
-              width: 115,
+            width: 115,
               child: DropdownButton<TransformType>(
                 value: item.type,
                 items: TransformType.values.map((type) {
@@ -197,14 +209,15 @@ class TransformCard extends StatelessWidget {
                 },
               ),
             ),
-            const SizedBox(width: 12),
-            // Параметры в зависимости от типа
-            SizedBox(width: 87, child: _buildParamFields()),
-            // Кнопка удаления
+            const SizedBox(width: 8),
+            
+            Expanded(child: _buildParamFields()),
+            
             IconButton(
               icon: const Icon(Icons.clear, color: Colors.red),
               onPressed: onDelete,
             ),
+            SizedBox(width: 16,)
           ],
         ),
       ),
@@ -265,14 +278,87 @@ class TransformCard extends StatelessWidget {
           ],
         );
       case TransformType.rotate:
-        return TextFormField(
-          initialValue: item.angle.toString(),
-          decoration: const InputDecoration(labelText: 'угол (рад)'),
-          onChanged: (v) {
-            final angle = double.tryParse(v) ?? 0.0;
-            item.angle = angle == 0 ? 0.0 : -angle;
-          },
+        return Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                initialValue: item.angle.toString(),
+                decoration: InputDecoration(labelText: item.useDegree ? 'угол (град)' : 'угол (рад)'),
+                onChanged: (v) {
+                  item.angle = double.tryParse(v) ?? 0.0;
+                },
+              ),
+            ),
+            SizedBox(width: 8,),
+            Expanded(
+              child: TextButton(
+                onPressed: () {
+                  item.useDegree = !item.useDegree;
+                  onAngleTypeChanged();
+                },
+                child: Align(alignment:AlignmentGeometry.centerLeft, child: Text(item.useDegree ? 'C' : 'R')),
+              ),
+            ),
+          ],
         );
+      case TransformType.rotateP:
+        return Column(
+    children: [
+      Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              initialValue: item.angle.toString(),
+              decoration: InputDecoration(
+                labelText: item.useDegree ? 'угол (град)' : 'угол (рад)',
+              ),
+              onChanged: (v) {
+                item.angle = double.tryParse(v) ?? 0.0;
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 48,
+            child: TextButton(
+              onPressed: () {
+                item.useDegree = !item.useDegree;
+                onAngleTypeChanged();
+              },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(40, 40),
+              ),
+              child: Text(item.useDegree ? 'C' : 'R'),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 8),
+      Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              initialValue: item.tx.toString(),
+              decoration: const InputDecoration(labelText: 'x центра'),
+              onChanged: (v) {
+                item.cx = double.tryParse(v) ?? 0.0;
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextFormField(
+              initialValue: item.ty.toString(),
+              decoration: const InputDecoration(labelText: 'y центра'),
+              onChanged: (v) {
+                item.cy = double.tryParse(v) ?? 0.0;
+              },
+            ),
+          ),
+        ],
+      ),
+    ],);
       case TransformType.reflectX:
       case TransformType.reflectY:
       case TransformType.reflectYX:

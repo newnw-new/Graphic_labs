@@ -1,15 +1,20 @@
 import 'dart:math';
+import 'dart:ui' show Offset;
 
-class Vec {
+class Vec extends Matrix{
   final List<double> _coordinates;
 
-  Vec(List<double> coordinates) : _coordinates = coordinates {
-    if (coordinates.isEmpty) {
+  Vec(this._coordinates) : super._init([_coordinates]) {
+    if (_coordinates.isEmpty) {
       throw ArgumentError('Нельзя создать точку без координат');
     }
   }
 
-  List<double> coordinates() => _coordinates;
+  factory Vec.fromOffset(Offset offset){
+    return Vec([offset.dx, offset.dy, 1]);
+  }
+
+  List<double> get coordinates => _coordinates;
 
   double euclideanNorm() {
     double sum = 0;
@@ -27,7 +32,15 @@ class Vec {
     return sum;
   }
 
-  Vec operator +(Vec b) {
+  Offset toOffset(){
+    if(_coordinates.length < 2) throw ArgumentError('Да трындец');
+
+    return Offset(_coordinates[0], _coordinates[1]);
+  }
+
+  @override
+  Vec operator +(Matrix b) {
+    if(!(b is Vec)) throw ArgumentError('Vector можно складывать только с другим Vector');
     if (this._coordinates.length != b._coordinates.length)
       throw ArgumentError('Векторы разных размерностей');
     return Vec(
@@ -38,13 +51,16 @@ class Vec {
     );
   }
 
+
+  @override
   Vec operator -() {
     return Vec(
       List.generate(this._coordinates.length, (i) => -this._coordinates[i]),
     );
   }
 
-  Vec operator -(Vec b) {
+  @override
+  Vec operator -(Matrix b) {
     return this + (-b);
   }
 }
@@ -56,20 +72,20 @@ class Line {
   Line.withStartVecAndVec({required Vec startVec, required Vec vec})
     : _O = startVec,
       _vec = vec {
-    if (vec.coordinates().every((c) => c == 0)) {
+    if (vec.coordinates.every((c) => c == 0)) {
       throw ArgumentError('Направляющий вектор не может быть нулевым');
     }
   }
 
   factory Line.withTwoVecs(Vec A1, Vec A2) {
-    if (A1.coordinates().length != A2.coordinates().length) {
+    if (A1.coordinates.length != A2.coordinates.length) {
       throw ArgumentError('Размерность точек не совпадает');
     }
 
     final Vec directVec = Vec(
       List.generate(
-        A1.coordinates().length,
-        (i) => A1.coordinates()[i] - A2.coordinates()[i],
+        A1.coordinates.length,
+        (i) => A1.coordinates[i] - A2.coordinates[i],
       ),
     );
 
@@ -77,21 +93,21 @@ class Line {
   }
 
   List<double>? getGeneralEquationCoeffs() {
-    if (_O.coordinates().length != 2 || _vec.coordinates().length != 2) {
+    if (_O.coordinates.length != 2 || _vec.coordinates.length != 2) {
       return null;
     }
 
-    final double A = _vec.coordinates()[1];
-    final double B = -_vec.coordinates()[0];
+    final double A = _vec.coordinates[1];
+    final double B = -_vec.coordinates[0];
     final double C =
-        _vec.coordinates()[0] * _O.coordinates()[1] -
-        _O.coordinates()[0] * _vec.coordinates()[1];
+        _vec.coordinates[0] * _O.coordinates[1] -
+        _O.coordinates[0] * _vec.coordinates[1];
 
     return [A, B, C];
   }
 
   bool VecAtLine(Vec A) {
-    if (A.coordinates().length != _O.coordinates().length) return false;
+    if (A.coordinates.length != _O.coordinates.length) return false;
 
     final AO = A - _O;
 
@@ -120,13 +136,13 @@ class Plane {
     required Vec vec1,
     required Vec vec2,
   }) {
-    if (vec1.coordinates().every((c) => c == 0) ||
-        vec2.coordinates().every((c) => c == 0)) {
+    if (vec1.coordinates.every((c) => c == 0) ||
+        vec2.coordinates.every((c) => c == 0)) {
       throw ArgumentError('Направляющий вектор не может быть нулевым');
     }
 
-    if (vec1.coordinates().length != vec2.coordinates().length ||
-        vec1.coordinates().length != startVec.coordinates().length) {
+    if (vec1.coordinates.length != vec2.coordinates.length ||
+        vec1.coordinates.length != startVec.coordinates.length) {
       throw ArgumentError('Разные размерности у аргументов');
     }
 
@@ -141,21 +157,21 @@ class Plane {
   }
 
   factory Plane.withThreeVecs(Vec A1, Vec A2, Vec A3) {
-    if (A1.coordinates().length != A2.coordinates().length ||
-        A1.coordinates().length != A3.coordinates().length) {
+    if (A1.coordinates.length != A2.coordinates.length ||
+        A1.coordinates.length != A3.coordinates.length) {
       throw ArgumentError('Размерность точек не совпадает');
     }
 
     final Vec directVec1 = Vec(
       List.generate(
-        A1.coordinates().length,
-        (i) => A1.coordinates()[i] - A2.coordinates()[i],
+        A1.coordinates.length,
+        (i) => A1.coordinates[i] - A2.coordinates[i],
       ),
     );
     final Vec directVec2 = Vec(
       List.generate(
-        A1.coordinates().length,
-        (i) => A1.coordinates()[i] - A3.coordinates()[i],
+        A1.coordinates.length,
+        (i) => A1.coordinates[i] - A3.coordinates[i],
       ),
     );
 
@@ -167,19 +183,19 @@ class Plane {
   }
 
   List<double>? getGeneralEquationCoeffs() {
-    if (_O.coordinates().length != 3 ||
-        _vec1.coordinates().length != 3 ||
-        _vec2.coordinates().length != 3) {
+    if (_O.coordinates.length != 3 ||
+        _vec1.coordinates.length != 3 ||
+        _vec2.coordinates.length != 3) {
       return null;
     }
 
-    final v1 = _vec1.coordinates();
-    final v2 = _vec2.coordinates();
+    final v1 = _vec1.coordinates;
+    final v2 = _vec2.coordinates;
 
     final A = v1[1] * v2[2] - v1[2] * v2[1];
     final B = v1[2] * v2[0] - v1[0] * v2[2];
     final C = v1[0] * v2[1] - v1[1] * v2[0];
-    final O = _O.coordinates();
+    final O = _O.coordinates;
     final D = -(A * O[0] + B * O[1] + C * O[2]);
 
     return [A, B, C, D];
@@ -187,21 +203,21 @@ class Plane {
 }
 
 double? scalarProduct(Vec vec1, Vec vec2) {
-  if (vec1.coordinates().length != vec2.coordinates().length) return null;
+  if (vec1.coordinates.length != vec2.coordinates.length) return null;
 
   double result = 0;
 
-  for (int i = 0; i < vec1.coordinates().length; ++i) {
-    result += vec1.coordinates()[i] * vec2.coordinates()[i];
+  for (int i = 0; i < vec1.coordinates.length; ++i) {
+    result += vec1.coordinates[i] * vec2.coordinates[i];
   }
 
   return result;
 }
 
 class Matrix {
-  late final List<List<double>> elements;
+  final List<List<double>> elements;
 
-  Matrix(List<List<double>> elements){
+  Matrix(this.elements){
     if (elements.isEmpty){ throw ArgumentError('Дан пустой массив для задания матрицы');}
 
     final rowsCount = elements.length;
@@ -212,12 +228,12 @@ class Matrix {
         throw ArgumentError('Задан неккоректный размер матрицы. Строки имеют разное число элементов');
       }
     }
-
-    this.elements = elements.map((row) => List<double>.from(row)).toList();
   }
 
+  Matrix._init(this.elements);
+
   List<List<double>> get matrixElements => elements.map((row) => List<double>.from(row)).toList();
-  //Переписать
+
   Matrix operator *(Matrix matrix){
 
     final rows1 = elements.length;
@@ -247,7 +263,7 @@ class Matrix {
     return Matrix(resultRows);
   }
 
-  Matrix scale(double scalar){
+  Matrix scaleScalar(double scalar){
     List<List<double>> newList = elements.map((row) => List<double>.from(row)).toList();
     for(int i = 0; i < newList.length; ++i){
       for(int j = 0; j < newList[i].length; ++j){
