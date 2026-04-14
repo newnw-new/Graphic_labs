@@ -259,12 +259,6 @@ class _GridPainter extends CustomPainter {
   }
 
   void _drawFigures(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.yellow
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-
-    //final worldXY = _worldCornerPoints(size);
 
     canvas.save();
     canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height));
@@ -273,7 +267,7 @@ class _GridPainter extends CustomPainter {
     Path figurePath = Path();
       for(int j = 0; j < figures[i].contours.length; ++j){
         final screenStartPoint = _toScreenCoordinates(screenPoint: figures[i].transform.multiplyOnVec(Vec.fromOffset(figures[i].contours[j][0])).toOffset(), size: size, pan: pan, zoom: zoom);
-        figurePath.moveTo(screenStartPoint.dx, screenStartPoint.dy);
+        figures[i].contours[j].length == 1 ? canvas.drawCircle(Offset(screenStartPoint.dx, screenStartPoint.dy), 4, figures[i].paint) : figurePath.moveTo(screenStartPoint.dx, screenStartPoint.dy);
         for(int k = 1; k < figures[i].contours[j].length; ++k){
           final screenPoint = _toScreenCoordinates(screenPoint: figures[i].transform.multiplyOnVec(Vec.fromOffset(figures[i].contours[j][k])).toOffset(), size: size, pan: pan, zoom: zoom);
           figurePath.lineTo(screenPoint.dx, screenPoint.dy);

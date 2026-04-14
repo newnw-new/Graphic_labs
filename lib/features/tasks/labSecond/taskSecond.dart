@@ -13,10 +13,8 @@ class TaskSecondLabSecond extends StatefulWidget {
 
 class _TaskSecondLabSecondState extends State<TaskSecondLabSecond>
     with SingleTickerProviderStateMixin {
-  // ← заменили SingleTickerProviderStateMixin
   late Ticker _ticker;
   double _time = 0;
-  //final model = PlaneModel.create();
 
   @override
   void initState() {
