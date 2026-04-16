@@ -57,7 +57,7 @@ class _TaskSecondLabSecondState extends State<TaskSecondLabSecond>
 
     return CoordinateGrid(
       figures: [
-        DrawableFigure(
+        DrawablePath(
           contours: body,
           transform: translation,
           paint: Paint()
@@ -65,7 +65,7 @@ class _TaskSecondLabSecondState extends State<TaskSecondLabSecond>
             ..style = PaintingStyle.stroke
             ..strokeWidth = 2
         ),
-        DrawableFigure(
+        DrawablePath(
           contours: wings,
           transform: wingAnimation,
           paint: Paint()

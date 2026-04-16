@@ -54,8 +54,8 @@ class TransformItem {
 }
 
 class TransformEditor extends StatefulWidget {
-  final DrawableFigure Figure;
-  final Function(DrawableFigure) onApply;
+  final DrawablePath Figure;
+  final Function(DrawablePath) onApply;
 
   const TransformEditor({Key? key, required this.Figure, required this.onApply})
     : super(key: key);
@@ -97,7 +97,7 @@ class _TransformEditorState extends State<TransformEditor> {
 
     final newTransform = combined.multiply(widget.Figure.transform);
 
-    final transformedFigure = DrawableFigure(
+    final transformedFigure = DrawablePath(
       contours: widget.Figure.contours,
       transform: newTransform,
       paint: widget.Figure.paint,

@@ -4,31 +4,133 @@ import 'package:flutter/material.dart';
 import 'package:graphic/core/utils/matrix3.dart';
 import 'package:graphic/core/utils/Geomerty.dart';
 
-class DrawableFigure {
-  final List<List<Offset>> contours;
+abstract class DrawableFigure {
   final Matrix3 transform;
   final Paint paint;
 
-  DrawableFigure({
+  DrawableFigure({required this.transform, required this.paint});
+
+  void draw({
+    required Canvas canvas,
+    required Size size,
+    required Offset pan,
+    required double zoom,
+  });
+}
+
+class DrawablePath extends DrawableFigure {
+  final List<List<Offset>> contours;
+
+  DrawablePath({
     required this.contours,
-    required this.transform,
-    required this.paint,
+    required super.transform,
+    required super.paint,
   }) : assert(
          contours.isNotEmpty && contours.every((c) => c.isNotEmpty),
          'Контуры не могут быть пустыми',
        );
 
-  // Удобный конструктор для фигур из одного контура
-  factory DrawableFigure.withPoints({
+  factory DrawablePath.withPoints({
     required List<Offset> points,
     required Matrix3 transform,
     required Paint paint,
   }) {
-    return DrawableFigure(
-      contours: [points],
-      transform: transform,
-      paint: paint,
-    );
+    return DrawablePath(contours: [points], transform: transform, paint: paint);
+  }
+
+  @override
+  void draw({
+    required Canvas canvas,
+    required Size size,
+    required Offset pan,
+    required double zoom,
+  }) {
+    Path figurePath = Path();
+    for (int j = 0; j < contours.length; ++j) {
+      final screenStartPoint = _toScreenCoordinates(
+        worldPoint: transform
+            .multiplyOnVec(Vec.fromOffset(contours[j][0]))
+            .toOffset(),
+        size: size,
+        pan: pan,
+        zoom: zoom,
+      );
+      contours[j].length == 1
+          ? canvas.drawCircle(
+              Offset(screenStartPoint.dx, screenStartPoint.dy),
+              4,
+              paint,
+            )
+          : figurePath.moveTo(screenStartPoint.dx, screenStartPoint.dy);
+      for (int k = 1; k < contours[j].length; ++k) {
+        final screenPoint = _toScreenCoordinates(
+          worldPoint: transform
+              .multiplyOnVec(Vec.fromOffset(contours[j][k]))
+              .toOffset(),
+          size: size,
+          pan: pan,
+          zoom: zoom,
+        );
+        figurePath.lineTo(screenPoint.dx, screenPoint.dy);
+      }
+    }
+    figurePath.close();
+    canvas.drawPath(figurePath, paint);
+  }
+}
+
+class DrawableCircle extends DrawableFigure{
+    final Offset center;
+    final double radius;
+
+  DrawableCircle({
+    required this.center,
+    required this.radius,
+    required super.transform,
+    required super.paint,
+  });
+  
+  @override
+  void draw({required Canvas canvas, required Size size, required Offset pan, required double zoom}) {
+    const int segments = 128;
+    final path = Path();
+
+    for (int i = 0; i <= segments; i++) {
+      final angle = 2 * pi * i / segments;
+
+      final localPoint = center + Offset(radius * cos(angle), radius * sin(angle));
+
+      final worldPoint = transform.multiplyOnVec(Vec.fromOffset(localPoint)).toOffset();
+
+      final screenPoint = _toScreenCoordinates(worldPoint: worldPoint, size: size, pan: pan, zoom: zoom);
+
+      if (i == 0) {
+        path.moveTo(screenPoint.dx, screenPoint.dy);
+      } else {
+        path.lineTo(screenPoint.dx, screenPoint.dy);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+
+  
+}
+
+class DrawablePoints extends DrawableFigure{
+  final List<Offset> points; // локальные координаты точек
+
+  DrawablePoints({required this.points, required super.transform, required super.paint});
+
+  @override
+  void draw({required Canvas canvas, required Size size, required Offset pan, required double zoom}) {
+    for (var localPoint in points) {
+      final world = transform.multiplyOnVec(Vec.fromOffset(localPoint)).toOffset();
+      final screen = _toScreenCoordinates(worldPoint: world, size:size, pan: pan, zoom: zoom);
+
+      canvas.drawCircle(screen, 4, paint);
+    }
   }
 }
 
@@ -53,7 +155,7 @@ class CoordinateGrid extends StatefulWidget {
     this.showGrid = true,
     this.showAxes = true,
     this.isPan = true,
-    this.isZoom = true
+    this.isZoom = true,
   });
 
   @override
@@ -73,34 +175,44 @@ class _CoordinateGridState extends State<CoordinateGrid> {
       builder: (context, constraints) {
         final size = Size(constraints.maxWidth, constraints.maxHeight);
         return MouseRegion(
-          cursor: widget.isPan ? SystemMouseCursors.grab : SystemMouseCursors.basic,
+          cursor: widget.isPan
+              ? SystemMouseCursors.grab
+              : SystemMouseCursors.basic,
           child: Listener(
-            onPointerSignal: widget.isZoom ? (event) {
-              if (event is PointerScrollEvent) {
-                _onScroll(event, size);
-              }
-            } : null,
+            onPointerSignal: widget.isZoom
+                ? (event) {
+                    if (event is PointerScrollEvent) {
+                      _onScroll(event, size);
+                    }
+                  }
+                : null,
             child: GestureDetector(
-              onPanStart: widget.isPan ? (details) {
-                setState(() {
-                  _dragStartPan = _pan;
-                  _panStart = details.localPosition;
-                });
-              } : null,
-              onPanUpdate: widget.isPan ? (details) {
-                if (_panStart != null && _dragStartPan != null) {
-                  final delta = details.localPosition - _panStart!;
-                  setState(() {
-                    _pan = _dragStartPan! + delta / (15 * _zoom);
-                  });
-                }
-              } : null,
-              onPanEnd: widget.isPan ? (details) {
-                setState(() {
-                  _panStart = null;
-                  _dragStartPan = null;
-                });
-              } : null,
+              onPanStart: widget.isPan
+                  ? (details) {
+                      setState(() {
+                        _dragStartPan = _pan;
+                        _panStart = details.localPosition;
+                      });
+                    }
+                  : null,
+              onPanUpdate: widget.isPan
+                  ? (details) {
+                      if (_panStart != null && _dragStartPan != null) {
+                        final delta = details.localPosition - _panStart!;
+                        setState(() {
+                          _pan = _dragStartPan! + delta / (15 * _zoom);
+                        });
+                      }
+                    }
+                  : null,
+              onPanEnd: widget.isPan
+                  ? (details) {
+                      setState(() {
+                        _panStart = null;
+                        _dragStartPan = null;
+                      });
+                    }
+                  : null,
               child: CustomPaint(
                 painter: _GridPainter(
                   figures: widget.figures,
@@ -111,7 +223,7 @@ class _CoordinateGridState extends State<CoordinateGrid> {
                   axesColor: widget.axesColor,
                   axesStrokeWidth: widget.axesStrokeWidth,
                   drawGrid: widget.showGrid,
-                  drawAxes: widget.showAxes
+                  drawAxes: widget.showAxes,
                 ),
                 size: size,
               ),
@@ -155,7 +267,7 @@ class _GridPainter extends CustomPainter {
     required this.axesColor,
     required this.axesStrokeWidth,
     required this.drawGrid,
-    required this.drawAxes
+    required this.drawAxes,
   });
 
   @override
@@ -179,13 +291,13 @@ class _GridPainter extends CustomPainter {
       x += 1
     ) {
       final p1 = _toScreenCoordinates(
-        screenPoint: Offset(x, worldXY.minY),
+        worldPoint: Offset(x, worldXY.minY),
         size: size,
         pan: pan,
         zoom: zoom,
       );
       final p2 = _toScreenCoordinates(
-        screenPoint: Offset(x, worldXY.maxY),
+        worldPoint: Offset(x, worldXY.maxY),
         size: size,
         pan: pan,
         zoom: zoom,
@@ -198,13 +310,13 @@ class _GridPainter extends CustomPainter {
       y += 1
     ) {
       final p1 = _toScreenCoordinates(
-        screenPoint: Offset(worldXY.minX, y),
+        worldPoint: Offset(worldXY.minX, y),
         size: size,
         pan: pan,
         zoom: zoom,
       );
       final p2 = _toScreenCoordinates(
-        screenPoint: Offset(worldXY.maxX, y),
+        worldPoint: Offset(worldXY.maxX, y),
         size: size,
         pan: pan,
         zoom: zoom,
@@ -224,13 +336,13 @@ class _GridPainter extends CustomPainter {
     if (worldXY.minX <= 0 && 0 <= worldXY.maxX) {
       canvas.drawLine(
         _toScreenCoordinates(
-          screenPoint: Offset(0, worldXY.minY),
+          worldPoint: Offset(0, worldXY.minY),
           size: size,
           pan: pan,
           zoom: zoom,
         ),
         _toScreenCoordinates(
-          screenPoint: Offset(0, worldXY.maxY),
+          worldPoint: Offset(0, worldXY.maxY),
           size: size,
           pan: pan,
           zoom: zoom,
@@ -242,13 +354,13 @@ class _GridPainter extends CustomPainter {
     if (worldXY.minY <= 0 && 0 <= worldXY.maxY) {
       canvas.drawLine(
         _toScreenCoordinates(
-          screenPoint: Offset(worldXY.minX, 0),
+          worldPoint: Offset(worldXY.minX, 0),
           size: size,
           pan: pan,
           zoom: zoom,
         ),
         _toScreenCoordinates(
-          screenPoint: Offset(worldXY.maxX, 0),
+          worldPoint: Offset(worldXY.maxX, 0),
           size: size,
           pan: pan,
           zoom: zoom,
@@ -259,22 +371,11 @@ class _GridPainter extends CustomPainter {
   }
 
   void _drawFigures(Canvas canvas, Size size) {
-
     canvas.save();
     canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height));
 
-    for(int i = 0; i < figures.length; ++i){
-    Path figurePath = Path();
-      for(int j = 0; j < figures[i].contours.length; ++j){
-        final screenStartPoint = _toScreenCoordinates(screenPoint: figures[i].transform.multiplyOnVec(Vec.fromOffset(figures[i].contours[j][0])).toOffset(), size: size, pan: pan, zoom: zoom);
-        figures[i].contours[j].length == 1 ? canvas.drawCircle(Offset(screenStartPoint.dx, screenStartPoint.dy), 4, figures[i].paint) : figurePath.moveTo(screenStartPoint.dx, screenStartPoint.dy);
-        for(int k = 1; k < figures[i].contours[j].length; ++k){
-          final screenPoint = _toScreenCoordinates(screenPoint: figures[i].transform.multiplyOnVec(Vec.fromOffset(figures[i].contours[j][k])).toOffset(), size: size, pan: pan, zoom: zoom);
-          figurePath.lineTo(screenPoint.dx, screenPoint.dy);
-        }
-      }
-      figurePath.close();
-      canvas.drawPath(figurePath, figures[i].paint);
+    for (var figure in figures) {
+      figure.draw(canvas: canvas, size: size, pan: pan, zoom: zoom);
     }
     canvas.restore();
   }
@@ -330,7 +431,7 @@ Offset _toWorldCoordinates({
 }
 
 Offset _toScreenCoordinates({
-  required Offset screenPoint,
+  required Offset worldPoint,
   required Size size,
   required Offset pan,
   required double zoom,
@@ -339,9 +440,9 @@ Offset _toScreenCoordinates({
   final right = 10 / zoom - pan.dx;
   final top = 10 / zoom + pan.dy;
   final bottom = -10 / zoom + pan.dy;
-  final sx = ((screenPoint.dx - left) / (right - left)) * size.width;
+  final sx = ((worldPoint.dx - left) / (right - left)) * size.width;
   final sy =
-      -((screenPoint.dy - bottom) * size.height / (top - bottom) - size.height);
+      -((worldPoint.dy - bottom) * size.height / (top - bottom) - size.height);
   return Offset(sx, sy);
 }
 

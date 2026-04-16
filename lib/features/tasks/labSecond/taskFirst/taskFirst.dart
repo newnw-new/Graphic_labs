@@ -14,7 +14,7 @@ class TaskFirstLabSecond extends StatefulWidget {
 }
 
 class _TaskFirstLabSecondState extends State<TaskFirstLabSecond> {
-  late DrawableFigure _Figure;
+  late DrawablePath _Figure;
 
   List<Matrix3> _history = [Matrix3.identity()];
 
@@ -24,7 +24,7 @@ class _TaskFirstLabSecondState extends State<TaskFirstLabSecond> {
   void initState() {
     super.initState();
 
-    _Figure = DrawableFigure(
+    _Figure = DrawablePath(
       contours: [
         [
           Offset(0.0, 2.0),
@@ -66,7 +66,7 @@ class _TaskFirstLabSecondState extends State<TaskFirstLabSecond> {
     return list;
   }
 
-  void _onApplyTransformations(DrawableFigure transformed) {
+  void _onApplyTransformations(DrawablePath transformed) {
     setState(() {
       _Figure = transformed;
       _history.length = _historyIndex+1;
@@ -92,15 +92,15 @@ class _TaskFirstLabSecondState extends State<TaskFirstLabSecond> {
                 onClear: _historyIndex  == 0? null:  () {setState(() {
                   _history.length = 1;
                   _historyIndex = 0;
-                  _Figure = DrawableFigure(contours: _Figure.contours, transform: _history[0], paint: _Figure.paint);
+                  _Figure = DrawablePath(contours: _Figure.contours, transform: _history[0], paint: _Figure.paint);
                 });},
                 onBack: _historyIndex == 0? null: () {setState(() {
                   _historyIndex-=1;
-                  _Figure = DrawableFigure(contours: _Figure.contours, transform: _history[_historyIndex], paint: _Figure.paint);
+                  _Figure = DrawablePath(contours: _Figure.contours, transform: _history[_historyIndex], paint: _Figure.paint);
                 });},
                 onForward: _historyIndex == _history.length-1 ? null: () {setState(() {
                   _historyIndex+=1;
-                  _Figure = DrawableFigure(contours: _Figure.contours, transform: _history[_historyIndex], paint: _Figure.paint);
+                  _Figure = DrawablePath(contours: _Figure.contours, transform: _history[_historyIndex], paint: _Figure.paint);
                 });},
                 child: CoordinateGrid(
                   figures: [_Figure],

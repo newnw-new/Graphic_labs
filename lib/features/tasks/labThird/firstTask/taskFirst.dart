@@ -69,17 +69,17 @@ class _TaskFirstLabThirdState extends State<TaskFirstLabThird> {
                 int.tryParse(_controllerB.values().elementAt(1))!,
               )
               .map(
-                (e) => DrawableFigure(
+                (e) => DrawablePath(
                   contours: [
                     [Offset(e.x.toDouble(), e.y.toDouble())],
                   ],
                   transform: Matrix3.identity(),
-                  paint: Paint()..color = Colors.red,
+                  paint: Paint()..color = Colors.blue,
                 ),
               )
               .toList();
         _points.add(
-                DrawableFigure(
+                DrawablePath(
                   contours: [
                     [
                       Offset(
