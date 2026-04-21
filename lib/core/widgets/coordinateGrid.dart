@@ -79,9 +79,9 @@ class DrawablePath extends DrawableFigure {
   }
 }
 
-class DrawableCircle extends DrawableFigure{
-    final Offset center;
-    final double radius;
+class DrawableCircle extends DrawableFigure {
+  final Offset center;
+  final double radius;
 
   DrawableCircle({
     required this.center,
@@ -89,20 +89,33 @@ class DrawableCircle extends DrawableFigure{
     required super.transform,
     required super.paint,
   });
-  
+
   @override
-  void draw({required Canvas canvas, required Size size, required Offset pan, required double zoom}) {
+  void draw({
+    required Canvas canvas,
+    required Size size,
+    required Offset pan,
+    required double zoom,
+  }) {
     const int segments = 128;
     final path = Path();
 
     for (int i = 0; i <= segments; i++) {
       final angle = 2 * pi * i / segments;
 
-      final localPoint = center + Offset(radius * cos(angle), radius * sin(angle));
+      final localPoint =
+          center + Offset(radius * cos(angle), radius * sin(angle));
 
-      final worldPoint = transform.multiplyOnVec(Vec.fromOffset(localPoint)).toOffset();
+      final worldPoint = transform
+          .multiplyOnVec(Vec.fromOffset(localPoint))
+          .toOffset();
 
-      final screenPoint = _toScreenCoordinates(worldPoint: worldPoint, size: size, pan: pan, zoom: zoom);
+      final screenPoint = _toScreenCoordinates(
+        worldPoint: worldPoint,
+        size: size,
+        pan: pan,
+        zoom: zoom,
+      );
 
       if (i == 0) {
         path.moveTo(screenPoint.dx, screenPoint.dy);
@@ -113,25 +126,81 @@ class DrawableCircle extends DrawableFigure{
     path.close();
     canvas.drawPath(path, paint);
   }
-
-
-  
 }
 
-class DrawablePoints extends DrawableFigure{
+class DrawablePoints extends DrawableFigure {
   final List<Offset> points; // локальные координаты точек
 
-  DrawablePoints({required this.points, required super.transform, required super.paint});
+  DrawablePoints({
+    required this.points,
+    required super.transform,
+    required super.paint,
+  });
 
   @override
-  void draw({required Canvas canvas, required Size size, required Offset pan, required double zoom}) {
+  void draw({
+    required Canvas canvas,
+    required Size size,
+    required Offset pan,
+    required double zoom,
+  }) {
     for (var localPoint in points) {
-      final world = transform.multiplyOnVec(Vec.fromOffset(localPoint)).toOffset();
-      final screen = _toScreenCoordinates(worldPoint: world, size:size, pan: pan, zoom: zoom);
+      final world = transform
+          .multiplyOnVec(Vec.fromOffset(localPoint))
+          .toOffset();
+      final screen = _toScreenCoordinates(
+        worldPoint: world,
+        size: size,
+        pan: pan,
+        zoom: zoom,
+      );
 
       canvas.drawCircle(screen, 4, paint);
     }
   }
+}
+
+class DrawableRectangle extends DrawableFigure {
+  final Offset topLeftPoint;
+  final Offset bottomRightPoint;
+
+  DrawableRectangle({
+    required this.topLeftPoint,
+    required this.bottomRightPoint,
+    required super.transform,
+    required super.paint,
+  });
+
+  @override
+  void draw({
+    required Canvas canvas,
+    required Size size,
+    required Offset pan,
+    required double zoom,
+  }) {
+    final worldTopLeftPoint = transform.multiplyOnVec(Vec.fromOffset(topLeftPoint)).toOffset();
+    final worldBottomRightPoint = transform.multiplyOnVec(Vec.fromOffset(bottomRightPoint)).toOffset();
+    final screenTopLeftPoint = _toScreenCoordinates(worldPoint: worldTopLeftPoint, size: size, pan: pan, zoom: zoom);
+    final screenBottomRightPoint = _toScreenCoordinates(worldPoint: worldBottomRightPoint, size: size, pan: pan, zoom: zoom);
+    canvas.drawRect(Rect.fromLTRB(screenTopLeftPoint.dx, screenTopLeftPoint.dy, screenBottomRightPoint.dx, screenBottomRightPoint.dy), paint);
+  }
+}
+
+class DrawableSegment extends DrawableFigure{
+  final Offset A;
+  final Offset B;
+
+  DrawableSegment({required this.A, required this.B, required super.transform, required super.paint});
+
+  @override
+  void draw({required Canvas canvas, required Size size, required Offset pan, required double zoom}) {
+    final worldA = transform.multiplyOnVec(Vec.fromOffset(A)).toOffset();
+    final worldB = transform.multiplyOnVec(Vec.fromOffset(B)).toOffset();
+    final screenA = _toScreenCoordinates(worldPoint: worldA, size: size, pan: pan, zoom: zoom);
+    final screenB = _toScreenCoordinates(worldPoint: worldB, size: size, pan: pan, zoom: zoom);
+    canvas.drawLine(screenA, screenB, paint);
+  }
+
 }
 
 class CoordinateGrid extends StatefulWidget {

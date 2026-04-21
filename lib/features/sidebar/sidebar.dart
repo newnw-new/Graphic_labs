@@ -75,6 +75,23 @@ class _SidebarState extends State<Sidebar> {
                       ),
                     ],
                   ),
+                  ExpansionTile(
+                    title: SidebarText('Лабораторная 4'),
+                    children: [
+                      ListTile(
+                        title: SidebarText('Задание 1'),
+                        onTap: () => {widget.onTaskSelect('task9')},
+                      ),
+                      ListTile(
+                        title: SidebarText('Задание 2'),
+                        onTap: () => {widget.onTaskSelect('task10')},
+                      ),
+                      ListTile(
+                        title: SidebarText('Задание 3'),
+                        onTap: () => {widget.onTaskSelect('task11')},
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
