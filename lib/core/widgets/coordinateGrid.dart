@@ -20,11 +20,13 @@ abstract class DrawableFigure {
 
 class DrawablePath extends DrawableFigure {
   final List<List<Offset>> contours;
+  final bool close;
 
   DrawablePath({
     required this.contours,
     required super.transform,
     required super.paint,
+    this.close = false,
   }) : assert(
          contours.isNotEmpty && contours.every((c) => c.isNotEmpty),
          'Контуры не могут быть пустыми',
@@ -34,8 +36,9 @@ class DrawablePath extends DrawableFigure {
     required List<Offset> points,
     required Matrix3 transform,
     required Paint paint,
+    bool close = false,
   }) {
-    return DrawablePath(contours: [points], transform: transform, paint: paint);
+    return DrawablePath(contours: [points], transform: transform, paint: paint, close: close);
   }
 
   @override
@@ -74,7 +77,7 @@ class DrawablePath extends DrawableFigure {
         figurePath.lineTo(screenPoint.dx, screenPoint.dy);
       }
     }
-    figurePath.close();
+    if(close) figurePath.close();
     canvas.drawPath(figurePath, paint);
   }
 }
