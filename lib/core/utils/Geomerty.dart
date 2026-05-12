@@ -65,6 +65,13 @@ class Vec extends Matrix{
   }
 }
 
+class Point extends Vec{
+  Point(final A, final B): super([A, B]);
+
+  double get x => _coordinates[0];
+  double get y => _coordinates[1];
+}
+
 class Line {
   final Vec _O;
   final Vec _vec;
@@ -308,4 +315,8 @@ class Matrix {
   List<double> _negativeList (List<double> list){
     return list.map((e) => -e).toList();
   }
+}
+
+Vec vecMulScalar(Vec v, double scalar) {
+  return Vec(v.coordinates.map((c) => c * scalar).toList());
 }

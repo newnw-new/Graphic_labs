@@ -203,6 +203,7 @@ class DrawableSegment extends DrawableFigure{
 
 }
 
+
 class CoordinateGrid extends StatefulWidget {
   final List<DrawableFigure> figures;
   final Color gridColor;

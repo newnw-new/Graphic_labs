@@ -32,7 +32,7 @@ class VecFieldState extends State<VecField> {
       
       fields.add(
         ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 50),
+          constraints: const BoxConstraints(minWidth: 10, maxWidth: 50),
           child: IntrinsicWidth(
             child: TextField(
               controller: widget.controller.controllers[i],

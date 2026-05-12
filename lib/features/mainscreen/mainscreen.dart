@@ -4,11 +4,14 @@ import 'package:graphic/features/tasks/labFirst/taskFirst.dart';
 import 'package:graphic/features/tasks/labFirst/taskFour.dart';
 import 'package:graphic/features/tasks/labFirst/taskSecond.dart';
 import 'package:graphic/features/tasks/labFirst/taskThird.dart';
+import 'package:graphic/features/tasks/labFour/taskFirst/taskFirst.dart';
 import 'package:graphic/features/tasks/labFour/taskSecond/taskSecond.dart';
+import 'package:graphic/features/tasks/labFour/taskThird/taskThird.dart';
 import 'package:graphic/features/tasks/labSecond/taskFirst/taskFirst.dart';
 import 'package:graphic/features/tasks/labSecond/taskSecond.dart';
 import 'package:graphic/features/tasks/labThird/firstTask/taskFirst.dart';
 import 'package:graphic/features/tasks/labThird/secondTask/taskSecond.dart';
+import 'package:graphic/features/tasks/labFive/taskFirst/taskFirst.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key, required this.title});
@@ -56,7 +59,10 @@ class _MainScreenState extends State<MainScreen> {
       case 'task6': return const TaskSecondLabSecond();
       case 'task7': return const TaskFirstLabThird();
       case 'task8': return const TaskSecondLabThird();
+      case 'task9': return const TaskFirstLabFour();
       case 'task10': return const TaskSecondLabFour();
+      case 'task11': return const TaskThirdLabFour();
+      case 'task12': return const TaskFirstLabFive();
       default: return Text('Не получилось');
     }
   }
