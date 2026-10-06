@@ -3,7 +3,6 @@ import 'package:graphic/core/utils/Geomerty.dart';
 import 'package:graphic/core/utils/matrix3.dart';
 import 'package:graphic/core/widgets/coordinateGrid.dart';
 import 'package:graphic/core/widgets/pointfield.dart';
-import 'dart:math';
 
 class TaskFirstLabSix extends StatefulWidget {
   const TaskFirstLabSix({super.key});
@@ -214,7 +213,7 @@ class _TaskFirstLabSixState extends State<TaskFirstLabSix> {
         next = p;
         continue;
       }
-      //Здесь добавить отображение двух ребер next и p
+      
       final drawNext = DrawableSegment(
         A: Offset(current.x, current.y),
         B: Offset(next.x, next.y),
@@ -242,11 +241,36 @@ class _TaskFirstLabSixState extends State<TaskFirstLabSix> {
       final cr = cross(current, next, p);
       if (cr < 0) {
         next = p;
-        //Здесь добавить отображение. Показать что поменяли ребро next
-      } else if (cr == 0) {
+        final drawNext = DrawableSegment(
+          A: Offset(current.x, current.y),
+          B: Offset(next.x, next.y),
+          transform: Matrix3.identity(),
+          paint: Paint()
+            ..color = Colors.red
+            ..strokeWidth = 4
+            ..style = PaintingStyle.stroke,
+        );
+        setState(() {
+          _updateFigures(addFigures: [drawNext]);
+        });
+        await Future.delayed(Duration(seconds: 1));
+      } else if (cr.abs() < 1e-6) {
         if (dist(current, p) > dist(current, next)) {
           next = p;
-          //Здесь добавить отображение. Показать что поменяли ребро next
+
+          final drawNext = DrawableSegment(
+            A: Offset(current.x, current.y),
+            B: Offset(next.x, next.y),
+            transform: Matrix3.identity(),
+            paint: Paint()
+              ..color = Colors.red
+              ..strokeWidth = 4
+              ..style = PaintingStyle.stroke,
+          );
+          setState(() {
+            _updateFigures(addFigures: [drawNext]);
+          });
+          await Future.delayed(Duration(seconds: 1));
         }
       }
     }
